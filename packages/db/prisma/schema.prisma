@@ -24,7 +24,6 @@ model Model {
   eyeColor       EyeColorEnum
   bald           Boolean
   userId         String
-  prompt         String
   status         OutputImagesEnum @default(Pending)
   TrainingImages TrainingImages[]
   OutputImages   OutputImages[]
@@ -44,11 +43,14 @@ model TrainingImages {
 }
 
 model OutputImages {
-  id       String @id @default(uuid())
-  imageUrl String
-  modelId  String
-  userId   String
-  model    Model  @relation(fields: [modelId], references: [id])
+  id        String   @id @default(uuid())
+  imageUrl  String   @default("")
+  modelId   String
+  userId    String
+  prompt    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  model     Model    @relation(fields: [modelId], references: [id])
 }
 
 model Packs {

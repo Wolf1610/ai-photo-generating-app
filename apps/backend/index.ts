@@ -48,14 +48,34 @@ app.post("/ai/training", async (req, res) => {
         })
     } catch (error) {
         res.json({
-            message: "Something went wrong"
+            message: "Something went wrong in Training"
         })
     }
 });
 
-app.post("/pack/generate", (req, res) => {
+app.post("/ai/generate", async (req, res) => {
+    const parsedBody = GenerateImage.safeParse(req.body);
+
+    if (!parsedBody.success) {
+        res.status(400).json({
+            message: "Invalid input"
+        })
+        return;
+    }
+
+    const { prompt, modelId } = parsedBody.data;
+
+    const data = await prismaClient.outputImages.create({
+        data: {
+            prompt,
+            userId: USER_ID,
+            modelId,
+            imageUrl: ""
+        }
+    })
+
     res.json({
-        message: "From pack"
+        imageId: data.id
     })
 });
 
