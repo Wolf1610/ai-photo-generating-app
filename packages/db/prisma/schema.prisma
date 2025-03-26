@@ -15,8 +15,14 @@ model User {
   updatedAt      DateTime @updatedAt
 }
 
+enum ModelTrainingStatusEnum {
+  Pending
+  Generated
+  Failed
+}
+
 model Model {
-  id             String           @id @default(uuid())
+  id             String                  @id @default(uuid())
   name           String
   type           ModelTypeEnum
   age            Int
@@ -24,10 +30,19 @@ model Model {
   eyeColor       EyeColorEnum
   bald           Boolean
   userId         String
-  status         OutputImagesEnum @default(Pending)
-  TrainingImages TrainingImages[]
-  OutputImages   OutputImages[]
+  triggerWord    String?
+  tensorPath     String?
+  status         OutputImagesEnum        @default(Pending)
+  trainingStatus ModelTrainingStatusEnum @default(Pending)
+  outputImages   OutputImages[]
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  zipUrl         String?
+  falAIReqiestId String? // Optional because we have multiple provider
+
+  @@index([falAIReqiestId])
 }
+
 
 enum OutputImagesEnum {
   Pending
@@ -35,22 +50,25 @@ enum OutputImagesEnum {
   Failed
 }
 
-model TrainingImages {
-  id       String @id @default(uuid())
-  imageUrl String
-  modelId  String
-  model    Model  @relation(fields: [modelId], references: [id])
+enum OutputImageStatusEnum {
+  Pending
+  Generated
+  Failed
 }
 
 model OutputImages {
-  id        String   @id @default(uuid())
-  imageUrl  String   @default("")
-  modelId   String
-  userId    String
-  prompt    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  model     Model    @relation(fields: [modelId], references: [id])
+  id             String                @id @default(uuid())
+  imageUrl       String                @default("")
+  modelId        String
+  userId         String
+  prompt         String
+  falAIReqiestId String? // Optional because we have multiple provider
+  status         OutputImageStatusEnum @default(Pending)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  model          Model                 @relation(fields: [modelId], references: [id])
+
+  @@index([falAIReqiestId]) // If we want to query by a specific parameter, you have to index it
 }
 
 model Packs {
