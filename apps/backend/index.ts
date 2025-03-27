@@ -18,6 +18,22 @@ const USER_ID = "1234";
 
 app.use(express.json());
 
+
+app.get("/pre-signed-url", async (req, res) => {
+    const key = `models/${Date.now()}_${Math.random()}.zip`;
+    const url = S3Client.presign(key,{
+        bucket: process.env.BUCKET,
+        accessKeyId: process.env.S3_ACCESS_KEY,
+        secretAccessKey: process.env.S3_SECRET_KEY,
+        endpoint: process.env.ENDPOINT,
+        expiresIn: 60 * 5 
+    })
+
+    res.json({
+        url
+    })
+})
+
 app.get("/", (req, res) => {
 
     res.json({
@@ -38,7 +54,7 @@ app.post("/ai/training", async (req, res) => {
 
         const { request_id, response_url } = await falAIModel.trainModel(parsedBody.data.zipUrl, parsedBody.data.name);
 
-        const { name, type, age, ethinicity, eyeColor, bald } = parsedBody.data;
+        const { name, type, age, ethinicity, eyeColor, bald, zipUrl } = parsedBody.data;
 
         const data = await prismaClient.model.create({
             data: {
@@ -49,6 +65,7 @@ app.post("/ai/training", async (req, res) => {
                 eyeColor,
                 bald,
                 userId: USER_ID,
+                zipUrl,
                 falAIReqiestId: request_id
             }
         })
