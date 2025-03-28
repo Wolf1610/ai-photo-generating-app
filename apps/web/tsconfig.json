@@ -5,7 +5,15 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    // for installing shadcn
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+    
   },
   "include": [
     "**/*.ts",

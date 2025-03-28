@@ -1,5 +1,6 @@
 
 import express from "express";
+import cors from "cors";
 import { S3Client } from "bun";
 
 import { GenerateImage, GenerateImagesFromPack, TrainModel } from "common/types"
@@ -17,7 +18,12 @@ const falAIModel = new FalAIModel();
 const USER_ID = "1234";
 
 app.use(express.json());
-
+app.use(cors({
+    origin: ["http://localhost:3000"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 app.get("/pre-signed-url", async (req, res) => {
     const key = `models/${Date.now()}_${Math.random()}.zip`;
@@ -26,8 +32,11 @@ app.get("/pre-signed-url", async (req, res) => {
         accessKeyId: process.env.S3_ACCESS_KEY,
         secretAccessKey: process.env.S3_SECRET_KEY,
         endpoint: process.env.ENDPOINT,
-        expiresIn: 60 * 5 
+        expiresIn: 60 * 5 ,
+        type: "application/zip"
     })
+
+    console.log(url);
 
     res.json({
         url
